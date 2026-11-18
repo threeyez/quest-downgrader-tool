@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quest Downgrader</title>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --panel: #12141a;
+    --panel2: #181b24;
+    --border: #2a2e3a;
+    --text: #e6e8ef;
+    --muted: #8b92a5;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    min-height: 100vh;
+    line-height: 1.45;
+  }
+
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.12), transparent),
+      var(--bg);
+  }
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px 28px 24px;
+  }
+  .login-card h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    text-align: center;
+  }
+  .login-card .sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13.5px;
+    margin: 6px 0 26px;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #c5cad6;
+    margin-bottom: 5px;
+  }
+  .hint {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .hint a { color: #60a5fa; text-decoration: none; }
+  .hint a:hover { text-decoration: underline; }
+  .code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    background: #1c2030;
+    color: #a5b4c8;
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: #0e1016;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 13px;
+    color: var(--text);
+    font-size: 13.5px;
+    outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: #4b5266; }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background .15s, opacity .15s;
+  }
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    padding: 12px;
+    margin-top: 6px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .warn-box {
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: #d4a017;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .err {
+    display: none;
+    background: #2a1215;
+    border: 1px solid #5c2228;
+    color: #fca5a5;
+    border-radius: 8px;
+    padding: 9px 11px;
+    font-size: 12.5px;
+    margin-bottom: 12px;
+  }
+
+  #main-screen {
+    display: none;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 22px 20px 48px;
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand h1 { font-size: 20px; font-weight: 700; }
+  .brand .who {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .brand .who b {
+    color: #93c5fd;
+    font-weight: 600;
+    cursor: text;
+  }
+  .btn-out {
+    background: var(--panel2);
+    color: #c5cad6;
+    border: 1px solid var(--border);
+    padding: 7px 12px;
+    font-size: 12.5px;
+    border-radius: 8px;
+  }
+  .btn-out:hover { background: #1f2430; color: #fff; }
+
+  .search {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .search input {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 13.5px;
+    outline: none;
+  }
+  .search input:focus { border-color: var(--accent); }
+  .btn-go {
+    background: var(--accent);
+    color: #fff;
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    white-space: nowrap;
+  }
+  .btn-go:hover { background: var(--accent-hover); }
+  .btn-go:disabled { opacity: .5; cursor: not-allowed; }
+
+  .status {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13.5px;
+    padding: 48px 12px;
+  }
+  .status.bad { color: #fca5a5; }
+
+  .app-bar {
+    display: none;
+    margin-bottom: 12px;
+  }
+  .app-bar h2 { font-size: 17px; font-weight: 650; }
+  .app-bar .meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+  .filters {
+    display: none;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-size: 11.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .chip.on {
+    background: #1e3a5f;
+    border-color: #3b82f6;
+    color: #93c5fd;
+  }
+
+  .list { display: flex; flex-direction: column; gap: 7px; }
+  .row {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .row:hover { border-color: #3a4154; }
+  .info { flex: 1; min-width: 0; }
+  .vname {
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .vmeta {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .tag {
+    font-size: 10.5px;
+    font-weight: 650;
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+  .tag-live { background: #132a1e; color: #4ade80; }
+  .tag-beta { background: #2a2210; color: #fbbf24; }
+  .btn-dl {
+    background: var(--accent);
+    color: #fff;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    flex-shrink: 0;
+  }
+  .btn-dl:hover { background: var(--accent-hover); }
+  .btn-dl:disabled {
+    background: #2a2e3a;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+
+  .foot {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 11px;
+    color: #4b5266;
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Quest Downgrader</h1>
+    <p class="sub">Pull any Quest game version · APK straight to your PC</p>
+    <div class="err" id="login-err"></div>
+
+    <div class="field">
+      <label>Access Token</label>
+      <div class="hint">Copy <span class="code">oc_ac_at</span> from <a href="https://secure.oculus.com" target="_blank" rel="noopener">secure.oculus.com</a> cookies</div>
+      <input type="password" id="ac" placeholder="OC… or FRL…" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="field">
+      <label>WWW Token <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <div class="hint">Cookie <span class="code">oc_www_at</span> — helps some endpoints</div>
+      <input type="password" id="www" placeholder="optional" autocomplete="off" spellcheck="false">
+    </div>
+
+    <button class="btn btn-primary" id="btn-login" onclick="login()">Continue</button>
+
+    <div class="warn-box">
+      <span>⚠</span>
+      <span>Tokens stay in this tab only (session). Never share them. They unlock your Meta library downloads.</span>
+    </div>
+  </div>
+</div>
+
+<div id="main-screen">
+  <div class="top">
+    <div class="brand">
+      <h1>Quest Downgrader</h1>
+      <div class="who">Logged in as <b id="uname" contenteditable="true" title="click to edit name">—</b></div>
+    </div>
+    <button class="btn btn-out" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="search">
+    <input type="text" id="gid" placeholder="App ID or Meta store URL" autocomplete="off" spellcheck="false">
+    <button class="btn btn-go" id="btn-load" onclick="load()">Load</button>
+  </div>
+
+  <div class="app-bar" id="app-bar">
+    <h2 id="app-name">—</h2>
+    <div class="meta" id="app-meta"></div>
+  </div>
+
+  <div class="filters" id="filters">
+    <span class="chip on" data-f="all">All</span>
+    <span class="chip" data-f="live">LIVE only</span>
+    <span class="chip" data-f="beta">BETA only</span>
+  </div>
+
+  <div id="status" class="status">Enter an App ID to list versions</div>
+  <div class="list" id="list"></div>
+  <div class="foot">session-only tokens · downloads hit Meta CDN with your own token</div>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const SS = sessionStorage;
+  const KEY = "qd_sess_v2";
+
+  let ac = null;
+  let www = null;
+  let uname = "Meta User";
+  let allVersions = [];
+  let filter = "all";
+
+  try {
+    const raw = SS.getItem(KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s.ac) {
+        ac = s.ac;
+        www = s.www || null;
+        uname = s.uname || "Meta User";
+        showMain();
+      }
+    }
+  } catch (_) {}
+
+  function saveSess() {
+    try {
+      SS.setItem(KEY, JSON.stringify({ ac, www, uname }));
+    } catch (_) {}
+  }
+
+  function showMain() {
+    $("login-screen").style.display = "none";
+    $("main-screen").style.display = "block";
+    $("uname").textContent = uname;
+  }
+
+  function showLogin() {
+    $("main-screen").style.display = "none";
+    $("login-screen").style.display = "flex";
+  }
+
+  window.login = async function () {
+    const a = $("ac").value.trim();
+    const w = $("www").value.trim();
+    const err = $("login-err");
+    err.style.display = "none";
+
+    if (!a) {
+      err.textContent = "Access token required.";
+      err.style.display = "block";
+      return;
+    }
+
+    $("btn-login").disabled = true;
+    $("btn-login").textContent = "Signing in…";
+
+    ac = a;
+    www = w || null;
+    uname = await fetchAlias(ac);
+    saveSess();
+
+    $("ac").value = "";
+    $("www").value = "";
+    $("btn-login").disabled = false;
+    $("btn-login").textContent = "Continue";
+    showMain();
+  };
+
+  async function fetchAlias(token) {
+    try {
+      const r = await fetch(
+        "https://graph.oculus.com/me?fields=id,alias&access_token=" + encodeURIComponent(token)
+      );
+      if (r.ok) {
+        const j = await r.json();
+        if (j.alias) return j.alias;
+      }
+    } catch (_) {}
+
+    const docs = ["3973343172743873", "4850747515044496"];
+    for (const doc of docs) {
+      try {
+        const body = new URLSearchParams({
+          access_token: token,
+          variables: "{}",
+          doc_id: doc
+        });
+        const r = await fetch("https://graph.oculus.com/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body
+        });
+        if (!r.ok) continue;
+        const j = await r.json();
+        const alias =
+          j?.data?.viewer?.user?.alias ||
+          j?.data?.viewer?.user?.display_name ||
+          j?.data?.me?.alias;
+        if (alias) return alias;
+      } catch (_) {}
+    }
+
+    const c = token.replace(/[^A-Za-z0-9]/g, "");
+    return c.length > 8 ? "User_" + c.slice(-6).toUpperCase() : "Meta User";
+  }
+
+  $("uname").addEventListener("blur", () => {
+    const t = $("uname").textContent.trim();
+    if (t) {
+      uname = t;
+      saveSess();
+    }
+  });
+  $("uname").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      $("uname").blur();
+    }
+  });
+
+  window.logout = function () {
+    ac = www = null;
+    uname = "Meta User";
+    allVersions = [];
+    try { SS.removeItem(KEY); } catch (_) {}
+    $("list").innerHTML = "";
+    $("app-bar").style.display = "none";
+    $("filters").style.display = "none";
+    $("status").style.display = "block";
+    $("status").className = "status";
+    $("status").textContent = "Enter an App ID to list versions";
+    $("gid").value = "";
+    showLogin();
+  };
+
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
+      chip.classList.add("on");
+      filter = chip.dataset.f;
+      render();
+    });
+  });
+
+  window.load = async function () {
+    if (!ac) {
+      showLogin();
+      return;
+    }
+    const raw = $("gid").value.trim();
+    if (!raw) {
+      status("Paste an App ID or store URL.", true);
+      return;
+    }
+    const m = raw.match(/(\d{10,})/);
+    if (!m) {
+      status("No valid numeric App ID found.", true);
+      return;
+    }
+    const appId = m[1];
+
+    $("btn-load").disabled = true;
+    $("btn-load").textContent = "…";
+    $("list").innerHTML = "";
+    $("app-bar").style.display = "none";
+    $("filters").style.display = "none";
+    status("Fetching versions…");
+
+    try {
+      const res = await fetch("https://oculusdb.rui2015.me/api/v1/connected/" + appId);
+      if (!res.ok) throw new Error("API " + res.status);
+      const data = await res.json();
+      let vers = (data.versions || []).filter(v => v && v.id);
+
+      if (!vers.length) {
+        status("No versions found for that App ID.", true);
+        return;
+      }
+
+      vers.sort((a, b) => (b.created_date || 0) - (a.created_date || 0));
+      allVersions = vers;
+
+      const name =
+        vers[0]?.parentApplication?.displayName ||
+        data.applications?.[0]?.displayName ||
+        data.applications?.[0]?.appName ||
+        "App " + appId;
+
+      $("app-name").textContent = name;
+      const liveN = vers.filter(v => v.downloadable === true).length;
+      const betaN = vers.length - liveN;
+      $("app-meta").textContent =
+        vers.length + " builds · " + liveN + " LIVE · " + betaN + " BETA · ID " + appId;
+      $("app-bar").style.display = "block";
+      $("filters").style.display = "flex";
+      $("status").style.display = "none";
+      filter = "all";
+      document.querySelectorAll(".chip").forEach(c => {
+        c.classList.toggle("on", c.dataset.f === "all");
+      });
+      render();
+    } catch (e) {
+      status("Load failed: " + (e.message || e), true);
+    } finally {
+      $("btn-load").disabled = false;
+      $("btn-load").textContent = "Load";
+    }
+  };
+
+  function status(msg, bad) {
+    const el = $("status");
+    el.style.display = "block";
+    el.className = "status" + (bad ? " bad" : "");
+    el.textContent = msg;
+  }
+
+  function render() {
+    const list = $("list");
+    list.innerHTML = "";
+    let rows = allVersions;
+    if (filter === "live") rows = rows.filter(v => v.downloadable === true);
+    if (filter === "beta") rows = rows.filter(v => v.downloadable !== true);
+
+    if (!rows.length) {
+      status("Nothing matches this filter.", false);
+      $("status").style.display = "block";
+      return;
+    }
+    $("status").style.display = "none";
+
+    const appName = $("app-name").textContent || "app";
+
+    rows.forEach(v => {
+      const isLive = v.downloadable === true;
+      const created = v.created_date
+        ? new Date(v.created_date * 1000).toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          })
+        : "—";
+
+      const ver = v.version || String(v.versionCode || v.id);
+      const fname =
+        v.file_name ||
+        appName.replace(/\s+/g, "-").toLowerCase() + "-" + ver + ".apk";
+
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div class="info">
+          <div class="vname">${esc(ver)}</div>
+          <div class="vmeta">
+            <span>code ${v.versionCode ?? "—"}</span>
+            <span>${created}</span>
+            <span class="tag ${isLive ? "tag-live" : "tag-beta"}">${isLive ? "LIVE" : "BETA"}</span>
+          </div>
+        </div>
+        <button class="btn btn-dl" ${isLive ? "" : "disabled"} data-id="${v.id}" data-fn="${escAttr(fname)}">
+          ${isLive ? "Download" : "BETA"}
+        </button>
+      `;
+      const btn = row.querySelector(".btn-dl");
+      if (isLive) {
+        btn.addEventListener("click", () => dl(v.id, fname, btn));
+      }
+      list.appendChild(row);
+    });
+  }
+
+  function dl(id, fname, btn) {
+    if (!ac) return;
+    const url =
+      "https://securecdn.oculus.com/binaries/download/?id=" +
+      encodeURIComponent(id) +
+      "&access_token=" +
+      encodeURIComponent(ac);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fname;
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 400);
+
+    const t = btn.textContent;
+    btn.textContent = "…";
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = t;
+      btn.disabled = false;
+    }, 1600);
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function escAttr(s) {
+    return String(s).replace(/"/g, "&quot;");
+  }
+
+  $("gid").addEventListener("keydown", e => {
+    if (e.key === "Enter") load();
+  });
+  ["ac", "www"].forEach(id => {
+    $(id).addEventListener("keydown", e => {
+      if (e.key === "Enter") login();
+    });
+  });
+
+  if (!ac) showLogin();
+})();
+</script>
+</body>
+</html>
